@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://univ.fr/sepa" xmlns="http://univ.fr/sepa">
+<!-- 
+	Sepa transaction - DrctDbtTxInf only
+	Corentin Le Guen - 2017
+-->
+
+	<!-- Elements -->
+	
+	<!-- == Root == -->
+	<xs:element name="CstmrDrctDbtInitn" type="rootType"/>
+
+	<!-- == Leafs == -->
+    <xs:element name="DrctDbtTxInf" type="ddtiType" />
+    <xs:element name="DrctDbtTx" type="ddtType" />
+    <xs:element name="DbtrAgt" type="dagType" />
+    <xs:element name="Dbtr" type="dType" />
+    <xs:element name="DbtrAcct" type="dacType" />
+
+	<!-- Simple types -->
+    <xs:simpleType name="Max35Text">
+        <xs:restriction base="xs:string">
+        	<xs:whiteSpace value="preserve"/>
+        	<xs:minLength value="0"/>
+      		<xs:maxLength value="35"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="IBANType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="BICType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]{8,11}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="SEPA">
+    	<xs:restriction base="xs:string">
+    		<xs:pattern value="SEPA"/>
+    	</xs:restriction>
+    </xs:simpleType>
+    
+    <!-- Complex Types -->
+	<xs:complexType name="Amount">
+	  <xs:simpleContent>
+	    <xs:extension base="xs:decimal">
+	      <xs:attribute name="Ccy" use="required" type="xs:string"/>
+	    </xs:extension>
+	  </xs:simpleContent>
+	</xs:complexType>
+	
+	<!-- == Root Type == -->
+	<xs:complexType name="rootType">
+	   <xs:sequence>
+	       <xs:element ref="DrctDbtTxInf" minOccurs="1" maxOccurs="unbounded"/>
+	   </xs:sequence>
+	</xs:complexType>
+	
+	<!-- == DrctDbtTxInf == -->
+    <xs:complexType name="ddtiType">
+        <xs:sequence>
+            <xs:element name="PmtId" minOccurs="1" maxOccurs="1" type="Max35Text"/>
+            <xs:element name="InstdAmt" minOccurs="1" maxOccurs="1" type="Amount"/>
+            
+            <xs:element ref="DrctDbtTx" minOccurs="1" maxOccurs="1"/>
+            <xs:element ref="DbtrAgt" minOccurs="1" maxOccurs="1"/>
+            <xs:element ref="Dbtr" minOccurs="1" maxOccurs="1"/>
+            <xs:element ref="DbtrAcct" minOccurs="1" maxOccurs="1"/>
+            
+            <xs:element name="RmtInf" minOccurs="0" maxOccurs="unbounded" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- == DrctDbtTx == -->
+    <xs:complexType name="ddtType">
+        <xs:sequence>
+        	<xs:element name="MndtRltdInf" minOccurs="1" maxOccurs="1">
+        		<xs:complexType>
+        			<xs:sequence>
+			            <xs:element name="MndtId" minOccurs="1" maxOccurs="1" type="Max35Text"/>
+			            <xs:element name="DtOfSgntr" minOccurs="1" maxOccurs="1" type="xs:date"/>
+        			</xs:sequence>
+        		</xs:complexType>
+        	</xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- == DbtrAgt == -->
+    <xs:complexType name="dagType">
+    	<xs:sequence>
+    		<xs:element name="FinInstnId" minOccurs="1" maxOccurs="1">
+    			<xs:complexType>
+			        <xs:choice>
+			            <xs:element name="BIC" minOccurs="1" maxOccurs="1" type="BICType"/>
+			            <!-- OR -->
+			            <xs:element name="Othr" minOccurs="1" maxOccurs="1">
+			            	<xs:complexType>
+			            		<xs:sequence>
+			            			<xs:element name="Id" minOccurs="1" maxOccurs="1" type="Max35Text"/>
+			            		</xs:sequence>
+			            	</xs:complexType>
+			            </xs:element>
+			        </xs:choice>
+    			</xs:complexType>
+    		</xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    
+    <!-- == Dbtr == -->
+    <xs:complexType name="dType">
+        <xs:sequence>
+            <xs:element name="Nm" minOccurs="1" maxOccurs="1" type="Max35Text"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- == DbtrAcct == -->
+    <xs:complexType name="dacType">
+    	<xs:sequence>
+    		<xs:element name="Id" minOccurs="1" maxOccurs="1">
+	    		<xs:complexType>
+			        <xs:choice>
+			            <xs:element name="IBAN" minOccurs="1" maxOccurs="1" type="IBANType"/>
+			            <!-- OR -->
+			            <xs:element name="PrvtId" minOccurs="1" maxOccurs="1">
+			            	<xs:complexType>
+			            		<xs:sequence>
+			            			<xs:element name="Othr" minOccurs="1" maxOccurs="1">
+			            				<xs:complexType>
+			            					<xs:sequence>
+			            						<xs:element name="Id" minOccurs="1" maxOccurs="1" type="Max35Text"/>
+			            						<xs:element name="SchmeNm" minOccurs="1" maxOccurs="1">
+			            							<xs:complexType>
+			            								<xs:sequence>
+			            									<xs:element name="Prtry" minOccurs="1" maxOccurs="1" type="SEPA"/>
+			            								</xs:sequence>
+			            							</xs:complexType>
+			            						</xs:element>
+			            					</xs:sequence>
+			            				</xs:complexType>
+			            			</xs:element>
+			            		</xs:sequence>
+			            	</xs:complexType>
+			            </xs:element>
+			        </xs:choice>
+	    		</xs:complexType>
+    		</xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+</xs:schema>
